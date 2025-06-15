@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лиза — самая…</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #ffe0f0, #ffeedd);
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #e91e63;
+    }
+    #compliment {
+      font-size: 2em;
+      margin: 20px 0;
+      transition: all 0.3s ease-in-out;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #ff69b4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e91e63;
+    }
+  </style>
+</head>
+<body>
+  <h1>Лиза — самая…</h1>
+  <div id="compliment">добрая</div>
+  <button onclick="nextCompliment()">Следующее</button>
+
+  <script>
+    const allAdjectives = [
+      "умная", "весёлая", "нежная", "харизматичная", "красивая", "яркая",
+      "ласковая", "заботливая", "чудесная", "талантливая", "обворожительная"
+    ];
+
+    function getRandomCompliments(count) {
+      const shuffled = [...allAdjectives].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function loadCompliments() {
+      const saved = localStorage.getItem("complimentData");
+      if (saved) {
+        const { compliments, timestamp } = JSON.parse(saved);
+        const now = Date.now();
+        if (now - timestamp < 24 * 60 * 60 * 1000) {
+          return compliments;
+        }
+      }
+
+      const newCompliments = getRandomCompliments(5);
+      localStorage.setItem("complimentData", JSON.stringify({
+        compliments: newCompliments,
+        timestamp: Date.now()
+      }));
+      return newCompliments;
+    }
+
+    const compliments = loadCompliments();
+    let currentIndex = 0;
+
+    function showCompliment() {
+      document.getElementById("compliment").innerText = compliments[currentIndex];
+    }
+
+    function nextCompliment() {
+      currentIndex = (currentIndex + 1) % compliments.length;
+      showCompliment();
+    }
+
+    // Инициализация
+    showCompliment();
+  </script>
+</body>
+</html>
