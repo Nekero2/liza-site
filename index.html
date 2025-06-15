@@ -5,151 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Комплименты для Лизы</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Montserrat:wght@400;600&display=swap');
+        
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #fff5f5;
-            color: #d23669;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
             text-align: center;
-            flex-direction: column;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
+
         .container {
-            max-width: 600px;
-            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(206, 92, 118, 0.3);
+            animation: fadeIn 1s ease-out;
         }
+
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin: 0 0 30px;
+            color: white;
+            letter-spacing: 1px;
         }
+
+        .compliment-box {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
         .compliment {
-            font-size: 2rem;
-            min-height: 60px;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #ffecef;
-            transition: opacity 0.5s;
+            font-size: 2.2rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            position: absolute;
+            width: 100%;
         }
+
+        .compliment.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         button {
-            background-color: #d23669;
+            background: #d23669;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 16px 32px;
             font-size: 1.2rem;
-            border-radius: 30px;
+            border-radius: 50px;
             cursor: pointer;
             margin-top: 20px;
-            transition: background-color 0.3s;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(210, 54, 105, 0.4);
+            transition: all 0.3s ease;
+            outline: none;
+            position: relative;
+            overflow: hidden;
         }
+
         button:hover {
-            background-color: #a51c4a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(210, 54, 105, 0.6);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #c8a6b5;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
         .counter {
-            margin-top: 30px;
+            margin-top: 25px;
             font-size: 1rem;
-            color: #888;
+            color: rgba(255,255,255,0.8);
         }
+
         .reset-info {
-            margin-top: 20px;
+            margin-top: 15px;
             font-size: 0.9rem;
-            color: #888;
+            color: rgba(255,255,255,0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Лиза — самая...</h1>
-        <div class="compliment" id="compliment">прекрасная</div>
-        <button id="nextBtn">Следующий комплимент</button>
-        <div class="counter" id="counter">Осталось комплиментов сегодня: 5</div>
-        <div class="reset-info">Комплименты обновятся через: <span id="resetTimer"></span></div>
+        <div class="compliment-box">
+            <div class="compliment active" id="compliment">прекрасная</div>
+        </div>
+        <button id="nextBtn" class="pulse">Следующий комплимент</button>
+        <div class="counter" id="counter">Осталось: 5 из 5</div>
+        <div class="reset-info">Новые комплименты через: <span id="resetTimer">24ч 00м</span></div>
     </div>
 
-<script>
-    // Полный список из 50 комплиментов
-    const allCompliments = [
-        "прекрасная", "нежная", "обаятельная", "лучезарная", "грациозная",
-        "стильная", "элегантная", "утончённая", "загадочная", "романтичная",
-        "вдохновляющая", "неповторимая", "восхитительная", "чарующая", "изысканная",
-        "безупречная", "сияющая", "неотразимая", "волшебная", "пленительная",
-        "очаровательная", "удивительная", "небесная", "мечтательная", "гармоничная",
-        "страстная", "грациозная", "лёгкая", "воздушная", "завораживающая",
-        "королевская", "божественная", "сказочная", "магическая", "неземная",
-        "искренняя", "тёплая", "ласковая", "заботливая", "понимающая",
-        "чувственная", "нежная", "любимая", "желанная", "единственная",
-        "незабываемая", "драгоценная", "бесценная", "идеальная", "совершенная"
-    ];
+    <script>
+        // Полный список из 50 комплиментов
+        const allCompliments = [
+            "прекрасная", "нежная", "обаятельная", "лучезарная", "грациозная",
+            "стильная", "элегантная", "утончённая", "загадочная", "романтичная",
+            "вдохновляющая", "неповторимая", "восхитительная", "чарующая", "изысканная",
+            "безупречная", "сияющая", "неотразимая", "волшебная", "пленительная",
+            "очаровательная", "удивительная", "небесная", "мечтательная", "гармоничная",
+            "страстная", "грациозная", "лёгкая", "воздушная", "завораживающая",
+            "королевская", "божественная", "сказочная", "магическая", "неземная",
+            "искренняя", "тёплая", "ласковая", "заботливая", "понимающая",
+            "чувственная", "нежная", "любимая", "желанная", "единственная",
+            "незабываемая", "драгоценная", "бесценная", "идеальная", "совершенная"
+        ];
 
-    // Получаем текущую дату в формате YYYY-MM-DD
-    function getCurrentDate() {
-        const now = new Date();
-        return now.toISOString().split('T')[0];
-    }
+        // Получаем текущую дату в формате YYYY-MM-DD
+        function getCurrentDate() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
 
-    // Инициализация приложения
-    function initApp() {
-        const today = getCurrentDate();
-        let lastVisitDate = localStorage.getItem('lastVisitDate');
-        
-        // Если день сменился или первый вход - создаем 5 случайных комплиментов
-        if (lastVisitDate !== today || !lastVisitDate) {
-            // Берем 5 случайных уникальных комплиментов
-            const shuffled = [...allCompliments].sort(() => 0.5 - Math.random());
-            const dailyCompliments = shuffled.slice(0, 5);
+        // Анимация смены комплимента
+        function switchCompliment(newText) {
+            const complimentBox = document.querySelector('.compliment-box');
+            const currentCompliment = document.getElementById('compliment');
+            const newCompliment = document.createElement('div');
             
-            localStorage.setItem('dailyCompliments', JSON.stringify(dailyCompliments));
-            localStorage.setItem('lastVisitDate', today);
-            localStorage.setItem('currentIndex', 0);
-            localStorage.setItem('complimentsLeft', 5);
+            newCompliment.className = 'compliment';
+            newCompliment.id = 'compliment';
+            newCompliment.textContent = newText;
+            
+            complimentBox.appendChild(newCompliment);
+            
+            setTimeout(() => {
+                currentCompliment.classList.remove('active');
+                newCompliment.classList.add('active');
+                
+                setTimeout(() => {
+                    complimentBox.removeChild(currentCompliment);
+                }, 600);
+            }, 50);
         }
-        
-        // Загружаем текущее состояние
-        const dailyCompliments = JSON.parse(localStorage.getItem('dailyCompliments')) || [];
-        let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
-        let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
-        
-        // Показываем текущий комплимент или "Пока хватит"
-        updateUI();
-        
-        // Обработчик кнопки
-        document.getElementById('nextBtn').addEventListener('click', function() {
-            // Если комплименты еще есть
-            if (complimentsLeft > 0) {
-                currentIndex++;
-                complimentsLeft--;
-                
-                localStorage.setItem('currentIndex', currentIndex);
-                localStorage.setItem('complimentsLeft', complimentsLeft);
-                
-                updateUI();
-            }
-        });
-        
-        // Обновление интерфейса
-        function updateUI() {
-            let complimentText;
-            if (complimentsLeft > 0) {
-                complimentText = dailyCompliments[currentIndex] || "Пока хватит";
-            } else {
-                complimentText = "Пока хватит";
-            }
-            
-            document.getElementById('compliment').textContent = complimentText;
-            document.getElementById('counter').textContent = (complimentsLeft > 0)
-                ? `Осталось комплиментов: ${complimentsLeft}`
-                : "На сегодня всё!";
-                
-            // Блокируем кнопку, если комплименты закончились
-            document.getElementById('nextBtn').disabled = (complimentsLeft <= 0);
-            
-            updateResetTimer();
-        }
-        
-        // Таймер до обновления
+
+        // Обновление таймера
         function updateResetTimer() {
             const now = new Date();
             const tomorrow = new Date(now);
@@ -162,12 +193,68 @@
             
             document.getElementById('resetTimer').textContent = `${hours}ч ${minutes}м`;
         }
-        
-        // Запускаем таймер
-        setInterval(updateResetTimer, 60000);
-        updateResetTimer();
-    }
 
-    // Запускаем приложение
-    document.addEventListener('DOMContentLoaded', initApp);
-</script>
+        // Инициализация приложения
+        function initApp() {
+            const today = getCurrentDate();
+            let lastVisitDate = localStorage.getItem('lastVisitDate');
+            
+            // Если день сменился или первый вход
+            if (lastVisitDate !== today || !lastVisitDate) {
+                // Выбираем 5 случайных уникальных комплиментов
+                const shuffled = [...allCompliments].sort(() => 0.5 - Math.random());
+                const dailyCompliments = shuffled.slice(0, 5);
+                
+                localStorage.setItem('dailyCompliments', JSON.stringify(dailyCompliments));
+                localStorage.setItem('lastVisitDate', today);
+                localStorage.setItem('currentIndex', 0);
+                localStorage.setItem('complimentsLeft', 5);
+            }
+            
+            // Загружаем текущее состояние
+            const dailyCompliments = JSON.parse(localStorage.getItem('dailyCompliments')) || [];
+            let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
+            let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
+            
+            // Обновляем интерфейс
+            updateUI();
+            
+            // Обработчик кнопки
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                if (complimentsLeft > 0) {
+                    currentIndex = (currentIndex + 1) % dailyCompliments.length;
+                    complimentsLeft--;
+                    
+                    localStorage.setItem('currentIndex', currentIndex);
+                    localStorage.setItem('complimentsLeft', complimentsLeft);
+                    
+                    switchCompliment(dailyCompliments[currentIndex]);
+                    updateUI();
+                }
+            });
+            
+            // Функция обновления интерфейса
+            function updateUI() {
+                const btn = document.getElementById('nextBtn');
+                
+                if (complimentsLeft <= 0) {
+                    btn.disabled = true;
+                    btn.classList.remove('pulse');
+                    document.getElementById('counter').textContent = "На сегодня всё!";
+                } else {
+                    document.getElementById('counter').textContent = `Осталось: ${complimentsLeft} из 5`;
+                }
+                
+                updateResetTimer();
+            }
+            
+            // Запускаем таймер
+            setInterval(updateResetTimer, 60000);
+            updateResetTimer();
+        }
+
+        // Запускаем приложение
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
