@@ -70,21 +70,19 @@
     </div>
 
 <script>
-    // 50 комплиментов (без изменений)
-    const compliments = [
+    // Полный список из 50 комплиментов
+    const allCompliments = [
         "прекрасная", "нежная", "обаятельная", "лучезарная", "грациозная",
-        // ... остальные комплименты ...
+        "стильная", "элегантная", "утончённая", "загадочная", "романтичная",
+        "вдохновляющая", "неповторимая", "восхитительная", "чарующая", "изысканная",
+        "безупречная", "сияющая", "неотразимая", "волшебная", "пленительная",
+        "очаровательная", "удивительная", "небесная", "мечтательная", "гармоничная",
+        "страстная", "грациозная", "лёгкая", "воздушная", "завораживающая",
+        "королевская", "божественная", "сказочная", "магическая", "неземная",
+        "искренняя", "тёплая", "ласковая", "заботливая", "понимающая",
+        "чувственная", "нежная", "любимая", "желанная", "единственная",
+        "незабываемая", "драгоценная", "бесценная", "идеальная", "совершенная"
     ];
-
-    // Перемешиваем массив комплиментов
-    function shuffleArray(array) {
-        const newArray = [...array];
-        for (let i = newArray.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-        }
-        return newArray;
-    }
 
     // Получаем текущую дату в формате YYYY-MM-DD
     function getCurrentDate() {
@@ -92,9 +90,70 @@
         return now.toISOString().split('T')[0];
     }
 
-    // Таймер до обновления комплиментов
-    function startResetTimer() {
-        function update() {
+    // Инициализация приложения
+    function initApp() {
+        const today = getCurrentDate();
+        let lastVisitDate = localStorage.getItem('lastVisitDate');
+        
+        // Если день сменился или первый вход - создаем новый набор
+        if (lastVisitDate !== today || !lastVisitDate) {
+            // Берем случайные 30 комплиментов из 50 (чтобы был запас)
+            const shuffled = [...allCompliments].sort(() => 0.5 - Math.random());
+            const dailyCompliments = shuffled.slice(0, 30);
+            
+            localStorage.setItem('dailyCompliments', JSON.stringify(dailyCompliments));
+            localStorage.setItem('lastVisitDate', today);
+            localStorage.setItem('currentIndex', 0);
+            localStorage.setItem('viewedCompliments', JSON.stringify([]));
+            localStorage.setItem('complimentsLeft', 5);
+        }
+        
+        // Загружаем текущее состояние
+        const dailyCompliments = JSON.parse(localStorage.getItem('dailyCompliments')) || [];
+        let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
+        let viewedCompliments = JSON.parse(localStorage.getItem('viewedCompliments')) || [];
+        let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
+        
+        // Показываем последний просмотренный или первый комплимент
+        updateUI();
+        
+        // Обработчик кнопки
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (complimentsLeft > 0) {
+                currentIndex = (currentIndex + 1) % dailyCompliments.length;
+                const currentCompliment = dailyCompliments[currentIndex];
+                
+                // Добавляем в просмотренные (если еще нет)
+                if (!viewedCompliments.includes(currentCompliment)) {
+                    viewedCompliments.push(currentCompliment);
+                    complimentsLeft--;
+                }
+                
+                localStorage.setItem('currentIndex', currentIndex);
+                localStorage.setItem('viewedCompliments', JSON.stringify(viewedCompliments));
+                localStorage.setItem('complimentsLeft', complimentsLeft);
+                
+                updateUI();
+            }
+        });
+        
+        // Обновление интерфейса
+        function updateUI() {
+            const currentCompliment = dailyCompliments[currentIndex] || "Ошибка загрузки";
+            
+            document.getElementById('compliment').textContent = currentCompliment;
+            document.getElementById('counter').textContent = (complimentsLeft > 0)
+                ? `Осталось новых комплиментов: ${complimentsLeft}`
+                : "Вы просмотрели все комплименты на сегодня";
+                
+            document.getElementById('nextBtn').disabled = (complimentsLeft <= 0);
+            
+            // Обновляем таймер
+            updateResetTimer();
+        }
+        
+        // Таймер до обновления
+        function updateResetTimer() {
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -104,63 +163,12 @@
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             
-            document.getElementById('resetTimer').textContent = `${hours} часов ${minutes} минут`;
-        }
-        update();
-        setInterval(update, 60000);
-    }
-
-    // Инициализация приложения
-    function initApp() {
-        const today = getCurrentDate();
-        let lastVisitDate = localStorage.getItem('lastVisitDate');
-        
-        // Если день сменился или первый вход
-        if (lastVisitDate !== today || !lastVisitDate) {
-            const shuffledCompliments = shuffleArray(compliments);
-            localStorage.setItem('usedCompliments', JSON.stringify(shuffledCompliments));
-            localStorage.setItem('lastVisitDate', today);
-            localStorage.setItem('currentIndex', 0);
-            localStorage.setItem('complimentsLeft', 5);
-        }
-        
-        // Загружаем текущее состояние
-        const availableCompliments = JSON.parse(localStorage.getItem('usedCompliments')) || [];
-        let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
-        let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
-        
-        // Показываем текущий комплимент (не меняем его при перезагрузке)
-        updateUI();
-        
-        // Обработчик кнопки
-        document.getElementById('nextBtn').addEventListener('click', function() {
-            if (complimentsLeft > 0) {
-                currentIndex = (currentIndex + 1) % availableCompliments.length;
-                complimentsLeft--;
-                
-                localStorage.setItem('currentIndex', currentIndex);
-                localStorage.setItem('complimentsLeft', complimentsLeft);
-                
-                updateUI();
-            }
-        });
-        
-        // Обновление интерфейса
-        function updateUI() {
-            const complimentText = (complimentsLeft > 0) 
-                ? availableCompliments[currentIndex] 
-                : "Сегодня комплименты закончились!";
-            
-            document.getElementById('compliment').textContent = complimentText;
-            document.getElementById('counter').textContent = (complimentsLeft > 0)
-                ? `Осталось комплиментов сегодня: ${complimentsLeft}`
-                : "Все комплименты на сегодня просмотрены";
-                
-            document.getElementById('nextBtn').disabled = (complimentsLeft <= 0);
+            document.getElementById('resetTimer').textContent = `${hours}ч ${minutes}м`;
         }
         
         // Запускаем таймер
-        startResetTimer();
+        setInterval(updateResetTimer, 60000);
+        updateResetTimer();
     }
 
     // Запускаем приложение
