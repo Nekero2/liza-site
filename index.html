@@ -18,7 +18,6 @@
             color: white;
             text-align: center;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
 
         .container {
@@ -52,16 +51,8 @@
         .compliment {
             font-size: 2.2rem;
             font-weight: 500;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            position: absolute;
-            width: 100%;
-        }
-
-        .compliment.active {
             opacity: 1;
-            transform: translateY(0);
+            transition: opacity 0.6s ease;
         }
 
         button {
@@ -77,18 +68,11 @@
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(210, 54, 105, 0.4);
             transition: all 0.3s ease;
-            outline: none;
-            position: relative;
-            overflow: hidden;
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(210, 54, 105, 0.6);
-        }
-
-        button:active {
-            transform: translateY(0);
         }
 
         button:disabled {
@@ -114,25 +98,15 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Лиза — самая...</h1>
         <div class="compliment-box">
-            <div class="compliment active" id="compliment">прекрасная</div>
+            <div class="compliment" id="compliment"></div>
         </div>
-        <button id="nextBtn" class="pulse">Следующий комплимент</button>
+        <button id="nextBtn">Следующий комплимент</button>
         <div class="counter" id="counter">Осталось: 5 из 5</div>
         <div class="reset-info">Новые комплименты через: <span id="resetTimer">24ч 00м</span></div>
     </div>
@@ -156,28 +130,6 @@
         function getCurrentDate() {
             const now = new Date();
             return now.toISOString().split('T')[0];
-        }
-
-        // Анимация смены комплимента
-        function switchCompliment(newText) {
-            const complimentBox = document.querySelector('.compliment-box');
-            const currentCompliment = document.getElementById('compliment');
-            const newCompliment = document.createElement('div');
-            
-            newCompliment.className = 'compliment';
-            newCompliment.id = 'compliment';
-            newCompliment.textContent = newText;
-            
-            complimentBox.appendChild(newCompliment);
-            
-            setTimeout(() => {
-                currentCompliment.classList.remove('active');
-                newCompliment.classList.add('active');
-                
-                setTimeout(() => {
-                    complimentBox.removeChild(currentCompliment);
-                }, 600);
-            }, 50);
         }
 
         // Обновление таймера
@@ -216,7 +168,8 @@
             let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
             let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
             
-            // Обновляем интерфейс
+            // Показываем первый комплимент
+            showCompliment(dailyCompliments[currentIndex]);
             updateUI();
             
             // Обработчик кнопки
@@ -228,10 +181,21 @@
                     localStorage.setItem('currentIndex', currentIndex);
                     localStorage.setItem('complimentsLeft', complimentsLeft);
                     
-                    switchCompliment(dailyCompliments[currentIndex]);
+                    showCompliment(dailyCompliments[currentIndex]);
                     updateUI();
                 }
             });
+            
+            // Функция отображения комплимента
+            function showCompliment(text) {
+                const complimentElement = document.getElementById('compliment');
+                complimentElement.style.opacity = 0;
+                
+                setTimeout(() => {
+                    complimentElement.textContent = text;
+                    complimentElement.style.opacity = 1;
+                }, 300);
+            }
             
             // Функция обновления интерфейса
             function updateUI() {
@@ -239,7 +203,6 @@
                 
                 if (complimentsLeft <= 0) {
                     btn.disabled = true;
-                    btn.classList.remove('pulse');
                     document.getElementById('counter').textContent = "На сегодня всё!";
                 } else {
                     document.getElementById('counter').textContent = `Осталось: ${complimentsLeft} из 5`;
