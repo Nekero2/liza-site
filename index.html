@@ -95,42 +95,34 @@
         const today = getCurrentDate();
         let lastVisitDate = localStorage.getItem('lastVisitDate');
         
-        // Если день сменился или первый вход - создаем новый набор
+        // Если день сменился или первый вход - создаем 5 случайных комплиментов
         if (lastVisitDate !== today || !lastVisitDate) {
-            // Берем случайные 30 комплиментов из 50 (чтобы был запас)
+            // Берем 5 случайных уникальных комплиментов
             const shuffled = [...allCompliments].sort(() => 0.5 - Math.random());
-            const dailyCompliments = shuffled.slice(0, 30);
+            const dailyCompliments = shuffled.slice(0, 5);
             
             localStorage.setItem('dailyCompliments', JSON.stringify(dailyCompliments));
             localStorage.setItem('lastVisitDate', today);
             localStorage.setItem('currentIndex', 0);
-            localStorage.setItem('viewedCompliments', JSON.stringify([]));
             localStorage.setItem('complimentsLeft', 5);
         }
         
         // Загружаем текущее состояние
         const dailyCompliments = JSON.parse(localStorage.getItem('dailyCompliments')) || [];
         let currentIndex = parseInt(localStorage.getItem('currentIndex')) || 0;
-        let viewedCompliments = JSON.parse(localStorage.getItem('viewedCompliments')) || [];
         let complimentsLeft = parseInt(localStorage.getItem('complimentsLeft')) || 5;
         
-        // Показываем последний просмотренный или первый комплимент
+        // Показываем текущий комплимент или "Пока хватит"
         updateUI();
         
         // Обработчик кнопки
         document.getElementById('nextBtn').addEventListener('click', function() {
+            // Если комплименты еще есть
             if (complimentsLeft > 0) {
-                currentIndex = (currentIndex + 1) % dailyCompliments.length;
-                const currentCompliment = dailyCompliments[currentIndex];
-                
-                // Добавляем в просмотренные (если еще нет)
-                if (!viewedCompliments.includes(currentCompliment)) {
-                    viewedCompliments.push(currentCompliment);
-                    complimentsLeft--;
-                }
+                currentIndex++;
+                complimentsLeft--;
                 
                 localStorage.setItem('currentIndex', currentIndex);
-                localStorage.setItem('viewedCompliments', JSON.stringify(viewedCompliments));
                 localStorage.setItem('complimentsLeft', complimentsLeft);
                 
                 updateUI();
@@ -139,16 +131,21 @@
         
         // Обновление интерфейса
         function updateUI() {
-            const currentCompliment = dailyCompliments[currentIndex] || "Ошибка загрузки";
+            let complimentText;
+            if (complimentsLeft > 0) {
+                complimentText = dailyCompliments[currentIndex] || "Пока хватит";
+            } else {
+                complimentText = "Пока хватит";
+            }
             
-            document.getElementById('compliment').textContent = currentCompliment;
+            document.getElementById('compliment').textContent = complimentText;
             document.getElementById('counter').textContent = (complimentsLeft > 0)
-                ? `Осталось новых комплиментов: ${complimentsLeft}`
-                : "Вы просмотрели все комплименты на сегодня";
+                ? `Осталось комплиментов: ${complimentsLeft}`
+                : "На сегодня всё!";
                 
+            // Блокируем кнопку, если комплименты закончились
             document.getElementById('nextBtn').disabled = (complimentsLeft <= 0);
             
-            // Обновляем таймер
             updateResetTimer();
         }
         
