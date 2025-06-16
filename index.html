@@ -16,7 +16,6 @@
             color: white;
             text-align: center;
         }
-
         .container {
             max-width: 500px;
             width: 90%;
@@ -25,12 +24,10 @@
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
             font-size: 2.5rem;
             margin: 0 0 30px;
         }
-
         .compliment {
             font-size: 2.2rem;
             font-weight: bold;
@@ -38,7 +35,6 @@
             margin: 30px 0;
             padding: 15px;
         }
-
         button {
             background: #d23669;
             color: white;
@@ -50,21 +46,21 @@
             margin-top: 20px;
             transition: background 0.3s;
         }
-
         button:hover {
             background: #c12a5e;
         }
-
         button:disabled {
             background: #cccccc;
             cursor: not-allowed;
         }
-
-        .counter {
+        .stats {
+            display: flex;
+            justify-content: space-between;
             margin-top: 25px;
+        }
+        .counter {
             font-size: 1rem;
         }
-
         .reset-info {
             margin-top: 15px;
             font-size: 0.9rem;
@@ -76,7 +72,10 @@
         <h1>Лиза — самая...</h1>
         <div class="compliment" id="compliment"></div>
         <button id="nextBtn">Следующий комплимент</button>
-        <div class="counter" id="counter">Осталось: 5 из 5</div>
+        <div class="stats">
+            <div class="counter" id="dailyCounter">Сегодня: 5/5</div>
+            <div class="counter" id="totalCounter">Уникальных: 0/50</div>
+        </div>
         <div class="reset-info">Новые комплименты через: <span id="resetTimer">24ч 00м</span></div>
     </div>
 
@@ -119,10 +118,14 @@
             const today = getCurrentDate();
             let lastVisitDate = localStorage.getItem('lastVisitDate');
             
+            // Загружаем или создаем коллекцию уникальных комплиментов
+            let uniqueCompliments = JSON.parse(localStorage.getItem('uniqueCompliments')) || [];
+            
             // Если день сменился или первый вход
             if (lastVisitDate !== today || !lastVisitDate) {
                 // Выбираем 5 случайных уникальных комплиментов
-                const shuffled = [...allCompliments].sort(() => 0.5 - Math.random());
+                const availableCompliments = allCompliments.filter(c => !uniqueCompliments.includes(c));
+                const shuffled = [...availableCompliments].sort(() => 0.5 - Math.random());
                 const dailyCompliments = shuffled.slice(0, 5);
                 
                 localStorage.setItem('dailyCompliments', JSON.stringify(dailyCompliments));
@@ -143,6 +146,14 @@
             // Обработчик кнопки
             document.getElementById('nextBtn').addEventListener('click', function() {
                 if (complimentsLeft > 0) {
+                    const currentCompliment = dailyCompliments[currentIndex];
+                    
+                    // Добавляем в уникальные, если еще нет
+                    if (!uniqueCompliments.includes(currentCompliment)) {
+                        uniqueCompliments.push(currentCompliment);
+                        localStorage.setItem('uniqueCompliments', JSON.stringify(uniqueCompliments));
+                    }
+                    
                     currentIndex++;
                     complimentsLeft--;
                     
@@ -156,20 +167,17 @@
             
             // Функция отображения комплимента
             function showCompliment(text) {
-                document.getElementById('compliment').textContent = text || "Пока хватит";
+                const displayText = text || "Пока хватит";
+                document.getElementById('compliment').textContent = displayText;
+                
+                // Блокируем кнопку если комплименты закончились
+                document.getElementById('nextBtn').disabled = !text;
             }
             
             // Функция обновления интерфейса
             function updateUI() {
-                const btn = document.getElementById('nextBtn');
-                const counter = document.getElementById('counter');
-                
-                if (complimentsLeft <= 0) {
-                    btn.disabled = true;
-                    counter.textContent = "На сегодня всё!";
-                } else {
-                    counter.textContent = `Осталось: ${complimentsLeft} из 5`;
-                }
+                document.getElementById('dailyCounter').textContent = `Сегодня: ${complimentsLeft}/5`;
+                document.getElementById('totalCounter').textContent = `Уникальных: ${uniqueCompliments.length}/50`;
             }
             
             // Запускаем таймер
@@ -177,7 +185,6 @@
             updateResetTimer();
         }
 
-        // Запускаем приложение
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
